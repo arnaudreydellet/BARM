@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercice Atelier — BMA Armurerie</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0f;
+    --surface: #16171a;
+    --surface2: #1e1f24;
+    --border: #2a2b32;
+    --accent: #c8a84b;
+    --accent2: #e8c96a;
+    --text: #e8e6e0;
+    --muted: #7a7870;
+    --danger: #c0392b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --display: 'Bebas Neue', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 28px 0 20px;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+
+  .school-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  .title-block h1 {
+    font-family: var(--display);
+    font-size: clamp(32px, 6vw, 52px);
+    letter-spacing: 0.04em;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .title-block .subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* Input screen */
+  #screen-input { animation: fadeUp 0.4s ease both; }
+  #screen-exercise { display: none; animation: fadeUp 0.5s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .intro-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin-bottom: 40px;
+  }
+
+  .intro-block p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  .intro-block strong {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* Form */
+  .form-section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 500px) {
+    .fields-grid { grid-template-columns: 1fr; }
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field-group label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .field-group .dim-name {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .field-group input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    padding: 14px 16px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .field-group input::-webkit-outer-spin-button,
+  .field-group input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .field-group input:focus {
+    border-color: var(--accent);
+    background: #1a1b20;
+  }
+
+  .field-group input::placeholder { color: var(--border); }
+
+  .field-unit {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    font-style: italic;
+  }
+
+  /* CTA Button */
+  .btn-generate {
+    background: var(--accent);
+    color: #0e0e0f;
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    padding: 16px 48px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    display: block;
+    width: 100%;
+  }
+
+  .btn-generate:hover { background: var(--accent2); }
+  .btn-generate:active { transform: scale(0.99); }
+
+  .error-msg {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #e74c3c;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ── EXERCISE SCREEN ── */
+  .ex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ex-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .ex-meta span {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .btn-reset {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  /* Situation block */
+  .situation-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 36px;
+    position: relative;
+  }
+
+  .situation-block::before {
+    content: 'MISE EN SITUATION';
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    position: absolute;
+    top: -1px;
+    left: 20px;
+    background: var(--surface);
+    padding: 0 8px;
+    transform: translateY(-50%);
+  }
+
+  .situation-block p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  .situation-block strong { color: var(--accent2); font-weight: 600; }
+
+  /* Parts */
+  .part {
+    margin-bottom: 40px;
+  }
+
+  .part-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .part-num {
+    font-family: var(--display);
+    font-size: 48px;
+    color: var(--border);
+    line-height: 1;
+    min-width: 40px;
+  }
+
+  .part-title {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--text);
+  }
+
+  .part-subtitle {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Questions */
+  .question {
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .question:hover { border-color: #3a3b44; }
+
+  .question-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 28px;
+  }
+
+  .q-text {
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .q-text strong { color: var(--accent2); font-weight: 600; }
+  .q-text em { color: var(--muted); font-style: italic; }
+
+  .q-formula {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  .answer-zone {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+  }
+
+  .answer-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .answer-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .answer-unit {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Warning box */
+  .warning-box {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    padding: 18px 22px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .warning-icon {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--accent);
+    min-width: 20px;
+    margin-top: 1px;
+  }
+
+  .warning-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  .warning-text strong { color: var(--accent); font-weight: 600; }
+
+  /* Atelier CTA */
+  .atelier-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 28px;
+    margin-top: 48px;
+    text-align: center;
+  }
+
+  .atelier-block .atelier-title {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .atelier-block p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: black; }
+    body::before { display: none; }
+    .btn-reset, .btn-generate { display: none; }
+    :root {
+      --bg: white; --surface: #f8f8f8; --surface2: #f0f0f0;
+      --border: #ddd; --accent: #8B6914; --accent2: #6B4F0C;
+      --text: #111; --muted: #666;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="school-tag">BMA Armurerie</div>
+    <div class="title-block">
+      <h1>EXERCICE ATELIER</h1>
+      <div class="subtitle">Trigonométrie · Équations · Fabrication</div>
+    </div>
+  </header>
+
+  <!-- ══════════ SCREEN 1 : INPUT ══════════ -->
+  <div id="screen-input">
+
+    <div class="intro-block">
+      <p>Tu as entre les mains une <strong>chute de bois</strong>. Commence par mesurer précisément ses trois dimensions avec un pied à coulisse ou une règle. Saisis-les ci-dessous — ton énoncé sera généré à partir de tes mesures.</p>
+    </div>
+
+    <div class="form-section-label">Dimensions de ta chute de bois</div>
+
+    <div class="fields-grid">
+      <div class="field-group">
+        <div class="dim-name">Longueur</div>
+        <label>L (mm)</label>
+        <input type="number" id="input-L" placeholder="ex: 120" min="40" max="200" step="0.5">
+        <div class="field-unit">axe principal</div>
+      </div>
+      <div class="field-group">
+        <div class="dim-name">Largeur</div>
+        <label>l (mm)</label>
+        <input type="number" id="input-l" placeholder="ex: 55" min="20" max="120" step="0.5">
+        <div class="field-unit">face visible</div>
+      </div>
+      <div class="field-group">
+        <div class="dim-name">Épaisseur</div>
+        <label>e (mm)</label>
+        <input type="number" id="input-e" placeholder="ex: 30" min="10" max="80" step="0.5">
+        <div class="field-unit">profondeur</div>
+      </div>
+    </div>
+
+    <p class="hint-text">Mesure bien chaque dimension, une erreur de mesure = une erreur de coupe.</p>
+
+    <button class="btn-generate" onclick="generate()">GÉNÉRER MON ÉNONCÉ</button>
+    <div class="error-msg" id="error-msg">⚠ Vérifie tes dimensions — toutes les valeurs doivent être renseignées et cohérentes (L ≥ 40 mm, l ≥ 20 mm, e ≥ 10 mm).</div>
+
+  </div>
+
+  <!-- ══════════ SCREEN 2 : EXERCISE ══════════ -->
+  <div id="screen-exercise">
+
+    <div class="ex-header">
+      <div class="ex-meta">
+        Chute : <span id="ex-dims"></span>
+      </div>
+      <button class="btn-reset" onclick="reset()">← Recommencer</button>
+    </div>
+
+    <div class="situation-block" id="situation-text"></div>
+
+    <div class="warning-box">
+      <div class="warning-icon">⚠</div>
+      <div class="warning-text"><strong>Consigne générale :</strong> Pour chaque question, écris le calcul complet sur ta feuille de brouillon avant de noter la réponse. Tu dois tracer la figure géométrique complète sur brouillon avant de passer en atelier. Montre-moi ta feuille quand tu viens me voir avec ta pièce.</div>
+    </div>
+
+    <!-- PARTIE A -->
+    <div class="part">
+      <div class="part-header">
+        <div class="part-num">A</div>
+        <div>
+          <div class="part-title">LES DIMENSIONS DE LA PIÈCE</div>
+          <div class="part-subtitle">Équations · Relations géométriques</div>
+        </div>
+      </div>
+      <div id="part-a-questions"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PARTIE B -->
+    <div class="part">
+      <div class="part-header">
+        <div class="part-num">B</div>
+        <div>
+          <div class="part-title">L'ANGLE DE COUPE</div>
+          <div class="part-subtitle">Trigonométrie · Sinus · Cosinus · Tangente</div>
+        </div>
+      </div>
+      <div id="part-b-questions"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PARTIE C -->
+    <div class="part">
+      <div class="part-header">
+        <div class="part-num">C</div>
+        <div>
+          <div class="part-title">LE PERÇAGE</div>
+          <div class="part-subtitle">Position · Angle d'inclinaison</div>
+        </div>
+      </div>
+      <div id="part-c-questions"></div>
+    </div>
+
+    <div class="atelier-block">
+      <div class="atelier-title">MAINTENANT, VA EN ATELIER</div>
+      <p>Reporte toutes tes cotes sur ta chute de bois, réalise les coupes et le perçage, puis viens me montrer ta pièce. C'est elle qui dira si tes calculs sont justes.</p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function Q(id, text, unit, formula = null) {
+  return { id, text, unit, formula };
+}
+
+function buildQuestion(q) {
+  const formulaHtml = q.formula
+    ? `<div class="q-formula">${q.formula}</div>` : '';
+  return `
+    <div class="question">
+      <div class="question-head">
+        <span class="q-num">${q.id}</span>
+        <div class="q-text">${q.text}${formulaHtml}</div>
+      </div>
+      <div class="answer-zone">
+        <span class="answer-label">Réponse :</span>
+        <div class="answer-line"></div>
+        <span class="answer-unit">${q.unit}</span>
+      </div>
+    </div>`;
+}
+
+function round(v, d = 1) {
+  return Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
+}
+
+function generate() {
+  const L = parseFloat(document.getElementById('input-L').value);
+  const l = parseFloat(document.getElementById('input-l').value);
+  const e = parseFloat(document.getElementById('input-e').value);
+
+  const err = document.getElementById('error-msg');
+
+  if (isNaN(L) || isNaN(l) || isNaN(e) || L < 40 || l < 20 || e < 10 || l >= L) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  // ─── Calcul robuste — AB ≤ L, AC ≤ l, α ∈ [28°,50°], β ∈ [20°,40°] ──────
+  // Équation affichée : AB = AC + c  (c positif, multiple de 5)
+  // α = arctan(AC/AB) — angle de coupe
+  // β = arctan(y_trou/d_trou) — angle de perçage
+
+  // AB ~ 75% de L, arrondi à 5
+  let base = Math.round(L * 0.75 / 5) * 5;
+  if (base > L) base = Math.floor(L / 5) * 5;
+
+  // AC ~ AB * tan(40°) ≈ AB * 0.839, clamped à l, arrondi à 5
+  let haut = Math.round(base * 0.839 / 5) * 5;
+  if (haut > l) haut = Math.floor(l / 5) * 5;
+  if (haut < 5) haut = 5;
+
+  // c = AB − AC (positif car tan(40°)<1 donc AC < AB)
+  const c_final = base - haut;
+  const k = 1;
+
+  const hyp = Math.round(Math.sqrt(base * base + haut * haut) * 10) / 10;
+  const alpha_rad = Math.atan(haut / base);
+  const alpha_deg = Math.round(alpha_rad * 180 / Math.PI * 10) / 10;
+
+  // Trou : d_trou ~ 40% de AB, y_trou ~ 55% de d_trou → β ~ 29°
+  const d_trou = Math.round(base * 0.40 / 5) * 5;
+  let y_trou = Math.round(d_trou * 0.55 / 5) * 5;
+  if (y_trou < 5) y_trou = 5;
+  if (y_trou / d_trou > 0.84) y_trou = Math.floor(d_trou * 0.84 / 5) * 5;
+  if (y_trou / d_trou < 0.30) y_trou = Math.ceil(d_trou * 0.30 / 5) * 5;
+
+  const beta_rad = Math.atan(y_trou / d_trou);
+  const beta_deg = Math.round(beta_rad * 180 / Math.PI * 10) / 10;
+
+  // ─── Render ────────────────────────────────────────────────────────────────
+
+  document.getElementById('ex-dims').textContent =
+    `L = ${L} mm · l = ${l} mm · e = ${e} mm`;
+
+  document.getElementById('situation-text').innerHTML = `
+    <p>
+      Un armurier doit usiner une <strong>pièce de renfort</strong> à partir de ta chute de bois.
+      Le bureau d'études a défini les contraintes géométriques de la pièce, mais n'a pas fourni les cotes finales — c'est à toi de les calculer.
+      La pièce est un <strong>triangle rectangle</strong> obtenu par une coupe oblique unique sur ta chute, avec un <strong>perçage incliné</strong> réalisé ensuite à la perceuse à colonne.
+      Tes calculs te donneront toutes les cotes nécessaires pour tracer et usiner la pièce.
+      <br><br>
+      On appellera <strong>AB</strong> le côté horizontal (base du triangle), <strong>AC</strong> le côté vertical (hauteur), et <strong>BC</strong> l'hypoténuse (le côté oblique — ta coupe).
+    </p>`;
+
+  // PARTIE A
+  const questionsA = [
+    Q("A1",
+      `Le bureau d'études impose la relation suivante entre les deux côtés de l'angle droit :<br>
+       <strong>AB = ${k} × AC + ${c_final}</strong><br>
+       On sait également que <strong>AC = ${haut} mm</strong>.<br>
+       Calcule la valeur de <strong>AB</strong>.`,
+      "mm",
+      `Rappel : résoudre en substituant AC dans l'équation.`
+    ),
+    Q("A2",
+      `Vérifie ta réponse : la longueur AB que tu as trouvée doit être compatible avec ta chute de bois (AB ≤ L = ${L} mm). Est-ce le cas ?<br>
+       Que se passerait-il si AB > L ?`,
+      "(réponse littérale)"
+    ),
+    Q("A3",
+      `Calcule la longueur de l'hypoténuse <strong>BC</strong> à l'aide du théorème de Pythagore.`,
+      "mm",
+      `BC² = AB² + AC²`
+    ),
+  ];
+
+  // PARTIE B
+  const questionsB = [
+    Q("B1",
+      `Dans le triangle ABC, quel est le rapport <strong>tan(α)</strong> en fonction de AC et AB, où α est l'angle en B (entre BC et AB) ?`,
+      "(formule littérale)",
+      `Dans un triangle rectangle : tan(angle) = côté opposé / côté adjacent`
+    ),
+    Q("B2",
+      `Calcule la valeur numérique de <strong>tan(α)</strong> avec tes valeurs de AC et AB.`,
+      "(valeur décimale)"
+    ),
+    Q("B3",
+      `Déduis l'angle <strong>α</strong> en degrés à l'aide de ta calculatrice (touche <em>arctan</em> ou <em>tan⁻¹</em>).<br>
+       C'est l'<strong>angle de coupe</strong> que tu devras régler sur la machine.`,
+      "°"
+    ),
+    Q("B4",
+      `Vérifie avec <strong>sin(α)</strong> : calcule sin(α) à partir de l'angle trouvé en B3, puis vérifie que <strong>sin(α) = AC / BC</strong>.<br>
+       Les deux valeurs correspondent-elles ? (tolérance : ± 0,01)`,
+      "(vérification)"
+    ),
+  ];
+
+  // PARTIE C
+  const questionsC = [
+    Q("C1",
+      `Le trou doit être percé sur la <strong>face oblique BC</strong> de la pièce, à une distance de <strong>${d_trou} mm</strong> du sommet B (mesurée horizontalement depuis B).<br>
+       À quelle hauteur verticale <strong>y</strong> se trouve ce point sur la face oblique ?<br>
+       <em>Indice : utilise tan(α) et la distance horizontale.</em>`,
+      "mm",
+      `y = distance_horizontale × tan(α)`
+    ),
+    Q("C2",
+      `Le perçage doit traverser la pièce de part en part avec une inclinaison par rapport à la verticale.<br>
+       La distance horizontale depuis B est <strong>${d_trou} mm</strong>, la profondeur à atteindre est <strong>${y_trou} mm</strong>.<br>
+       Calcule <strong>tan(β)</strong> où β est l'angle d'inclinaison du foret par rapport à la verticale.`,
+      "(valeur décimale)",
+      `tan(β) = distance_horizontale / profondeur`
+    ),
+    Q("C3",
+      `Calcule l'angle <strong>β</strong> en degrés (touche <em>arctan</em> ou <em>tan⁻¹</em>).<br>
+       C'est l'<strong>angle d'inclinaison de la perceuse</strong> que tu devras régler.`,
+      "°"
+    ),
+    Q("C4",
+      `Récapitulatif final : note ici les <strong>4 cotes à reporter sur ta pièce</strong> avant d'aller en atelier :<br>
+       AB = ___ mm &nbsp;|&nbsp; AC = ___ mm &nbsp;|&nbsp; angle de coupe α = ___ ° &nbsp;|&nbsp; angle de perçage β = ___ °`,
+      "(récapitulatif)"
+    ),
+  ];
+
+  document.getElementById('part-a-questions').innerHTML =
+    questionsA.map(buildQuestion).join('');
+  document.getElementById('part-b-questions').innerHTML =
+    questionsB.map(buildQuestion).join('');
+  document.getElementById('part-c-questions').innerHTML =
+    questionsC.map(buildQuestion).join('');
+
+  document.getElementById('screen-input').style.display = 'none';
+  document.getElementById('screen-exercise').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function reset() {
+  document.getElementById('screen-input').style.display = 'block';
+  document.getElementById('screen-exercise').style.display = 'none';
+  document.getElementById('input-L').value = '';
+  document.getElementById('input-l').value = '';
+  document.getElementById('input-e').value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
