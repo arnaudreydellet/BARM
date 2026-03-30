@@ -385,7 +385,7 @@
   }
 
   .answer-zone {
-    padding: 14px 20px;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -399,10 +399,28 @@
     white-space: nowrap;
   }
 
-  .answer-line {
+  .answer-input {
     flex: 1;
-    height: 1px;
-    background: var(--border);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--accent);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    min-width: 0;
+  }
+
+  .answer-input:focus {
+    border-color: var(--accent2);
+    background: #13141a;
+  }
+
+  .answer-input::placeholder {
+    color: #3a3b44;
+    font-style: italic;
   }
 
   .answer-unit {
@@ -608,6 +626,8 @@ function Q(id, text, unit, formula = null) {
 function buildQuestion(q) {
   const formulaHtml = q.formula
     ? `<div class="q-formula">${q.formula}</div>` : '';
+  const placeholder = q.unit === '(réponse littérale)' || q.unit === '(vérification)' || q.unit === '(récapitulatif)' || q.unit === '(formule littérale)' || q.unit === '(valeur décimale)'
+    ? 'Écris ta réponse ici...' : 'Calcul et résultat...';
   return `
     <div class="question">
       <div class="question-head">
@@ -616,7 +636,7 @@ function buildQuestion(q) {
       </div>
       <div class="answer-zone">
         <span class="answer-label">Réponse :</span>
-        <div class="answer-line"></div>
+        <input class="answer-input" type="text" placeholder="${placeholder}" autocomplete="off" spellcheck="false">
         <span class="answer-unit">${q.unit}</span>
       </div>
     </div>`;
